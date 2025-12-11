@@ -1,5 +1,6 @@
 
 boolean update = false;
+boolean gameStarted;
 int currentScreen = 0;
 /*
  0 = title screen
@@ -10,7 +11,7 @@ int currentScreen = 0;
  */
 
 // stats (stuff that changes)
-int level = 0; //tut = 0
+int level = -1; //tut = 0
 int carbonCaught;
 int carbonConvert;
 int carbonStored;
@@ -48,8 +49,8 @@ String[] buyers = {
   "Building Benny", // for concrete
   "Heating Henderson", // for fuel
   "Composite Coleman", // for C nanotubes
-  "Sparkling ", // for carbonated water
-  "Polymer ", // for bioplastic
+  "Sparkling Soda ", // for carbonated water
+  "Polymer Plastic", // for bioplastic
 };
 
 
@@ -101,9 +102,11 @@ void keyPressed() {
       level = 3;
     }
     currentScreen = 1;
+    gameStarted = true;
   }
 
-  if (currentScreen != 0) {
+
+  if (gameStarted) {
     if (key == '1') {
       currentScreen = 1;
     }
@@ -124,6 +127,9 @@ void keyPressed() {
 }
 
 void titleScreen() {
+
+
+
   if (currentScreen == 0) {
     background(255);
     //displays climate cuisine
@@ -172,8 +178,12 @@ void orderScreen() {
     rect(0, 0.9*height, width, height);
 
     fill(255);
+    textSize(25);
     textAlign(CENTER, CENTER);
     text("Order Screen", width/2, 0.95*height);
+    textSize(15);
+    textAlign(LEFT, CENTER);
+    text("Move screens using [1,2,3,4]", width/100, 0.95*height);
 
     // println(level);
     if (level == 0) {
@@ -204,6 +214,8 @@ void orderTicket(float topX, float topY, float ticketWidth, float ticketHeight, 
   //ticket head
   rect(topX, topY, ticketWidth, 0.15*ticketHeight);
   fill(0);
+  textSize(25);
+  textAlign(CENTER, CENTER);
   text(buyers[person], topX + ticketWidth/2, topY + 0.15*ticketHeight/2);
 }
 
@@ -215,8 +227,12 @@ void captureScreen() {
     rect(0, 0.9*height, width, height);
 
     fill(255);
+    textSize(25);
     textAlign(CENTER, CENTER);
     text("Capture Screen", width/2, 0.95*height);
+    textSize(15);
+    textAlign(LEFT, CENTER);
+    text("Move screens using [1,2,3,4]", width/100, 0.95*height);
   }
 }
 
@@ -228,8 +244,12 @@ void convertScreen() {
     rect(0, 0.9*height, width, height);
 
     fill(255);
+    textSize(25);
     textAlign(CENTER, CENTER);
     text("Convert Screen", width/2, 0.95*height);
+    textSize(15);
+    textAlign(LEFT, CENTER);
+    text("Move screens using [1,2,3,4]", width/100, 0.95*height);
   }
 }
 
@@ -241,8 +261,12 @@ void createScreen() {
     rect(0, 0.9*height, width, height);
 
     fill(255);
+    textSize(25);
     textAlign(CENTER, CENTER);
     text("Create Screen", width/2, 0.95*height);
+    textSize(15);
+    textAlign(LEFT, CENTER);
+    text("Move screens using [1,2,3,4]", width/100, 0.95*height);
   }
 }
 
