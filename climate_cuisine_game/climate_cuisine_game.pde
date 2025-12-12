@@ -58,7 +58,7 @@ String[] buyers = {
 // capture screen
 int TOTAL_CO2;
 int MOL_SIZE = 15;
-color carbonGray = color(54, 54, 54);
+color carbonGray = color(128, 128, 128);
 Molecules[] molecule;
 
 
