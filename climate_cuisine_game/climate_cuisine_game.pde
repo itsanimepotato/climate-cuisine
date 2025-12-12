@@ -49,9 +49,17 @@ String[] buyers = {
   "Building Benny", // for concrete
   "Heating Henderson", // for fuel
   "Composite Coleman", // for C nanotubes
-  "Sparkling Soda ", // for carbonated water
+  "Sparkling Soda(water)", // for carbonated water
   "Polymer Plastic", // for bioplastic
+  "Chalky Chalk", // for chalk
 };
+
+
+// capture screen
+int TOTAL_CO2;
+int MOL_SIZE = 15;
+color carbonGray = color(54, 54, 54);
+Molecules[] molecule;
 
 
 
@@ -59,6 +67,7 @@ void setup() {
   size(750, 500);
   background(255);
   randomScrollText = int(random(0, scrollText.length));
+
 
   materialCreated = new int[3];
   // println("materialCreated has been created: " + materialCreated);
@@ -74,17 +83,24 @@ void setup() {
     person3 = int(random(1, buyers.length));
   }
   println("person setup: " + person1 + person2 + person3);
+
+  TOTAL_CO2 = 10;
+  molecule = new Molecules[TOTAL_CO2];
+
+  for (int i = 0; i < TOTAL_CO2; i++) {
+    int startX = int(random(MOL_SIZE, width - MOL_SIZE));
+    int startY = int(random(MOL_SIZE, height*0.9 - MOL_SIZE));
+    molecule[i] = new Molecules(startX, startY, MOL_SIZE, carbonGray);
+  }
 }
 
 void draw() {
   //println(currentScreen);
-  updateStats(); // updates how much carbon created etc.
   titleScreen(); // current screen is 0
   orderScreen(); // current screen is 1
   captureScreen(); // current screen is 2
   convertScreen(); // current screen is 3
   createScreen(); // current screen is 4
-  update = false;
 }
 
 void keyPressed() {
@@ -128,62 +144,76 @@ void keyPressed() {
 
 void titleScreen() {
 
-
-
   if (currentScreen == 0) {
     background(255);
-    //displays climate cuisine
-    fill(0);
-    textAlign(CENTER, CENTER);
-    textSize(100);
-    text("CLIMATE CUISINE", width/2, height/2 - 150);
 
-    //displays the blinking "press space" to move on to next
-    textSize(40);
-    if (frameCount % 60 == 0) {
-      blinky = !blinky;
-    }
-    if (blinky) {
-      fill(255, 0, 0);
-      text ("PRESS 1 for EASY, 2 for MEDIUM, 3 for HARD", width/2, height/2 + 150);
-      text ("PRESS 0 for the TUTORIAL", width/2, height/2 + 200);
-    } else {
-      fill(0, 255, 0);
-      text ("PRESS 1 for EASY, 2 for MEDIUM, 3 for HARD", width/2, height/2 + 150);
-      text ("PRESS 0 for the TUTORIAL", width/2, height/2 + 200);
-    }
-
-
-    //displays scrolling text
-    textAlign(LEFT, CENTER);
-    textSize(25);
-    fill(#11BAF5);
-    if (frameCount % width == 0) {
-      randomScrollText = int(random(0, scrollText.length));
-      println("randomScrollText " + randomScrollText + " has been picked");
-      while (randomScrollText == prevScrollText) {
-        randomScrollText = int(random(0, scrollText.length));
-      }
-    }
-    text(scrollText[randomScrollText], width - (frameCount % width + width/4), height/2);
-    prevScrollText = randomScrollText;
+    titleGameText();
+    titleBlinkingText();
+    titleScrollingText();
   }
 }
+void titleGameText() {
+  //displays climate cuisine
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(100);
+  text("CLIMATE CUISINE", width/2, height/2 - 150);
+}
+
+void titleBlinkingText() {
+  //displays the blinking "press space" to move on to next
+  textSize(40);
+  if (frameCount % 60 == 0) {
+    blinky = !blinky;
+  }
+  if (blinky) {
+    fill(255, 0, 0);
+    text ("PRESS 1 for EASY, 2 for MEDIUM, 3 for HARD", width/2, height/2 + 150);
+    text ("PRESS 0 for the TUTORIAL", width/2, height/2 + 200);
+  } else {
+    fill(0, 255, 0);
+    text ("PRESS 1 for EASY, 2 for MEDIUM, 3 for HARD", width/2, height/2 + 150);
+    text ("PRESS 0 for the TUTORIAL", width/2, height/2 + 200);
+  }
+}
+
+void titleScrollingText() {
+  //displays scrolling text
+  textAlign(LEFT, CENTER);
+  textSize(25);
+  fill(#11BAF5);
+  if (frameCount % width == 0) {
+    randomScrollText = int(random(0, scrollText.length));
+    println("randomScrollText " + randomScrollText + " has been picked");
+    while (randomScrollText == prevScrollText) {
+      randomScrollText = int(random(0, scrollText.length));
+    }
+  }
+  text(scrollText[randomScrollText], width - (frameCount % width + width/4), height/2);
+  prevScrollText = randomScrollText;
+}
+
+
+void navBar(String screen) {
+  // black bar
+  fill(0);
+  rect(0, 0.9*height, width, height);
+  // white text
+  fill(255);
+  textSize(25);
+  textAlign(CENTER, CENTER);
+  text(screen, width/2, 0.95*height);
+  textSize(15);
+  textAlign(LEFT, CENTER);
+  text("Move screens using [1,2,3,4]", width/100, 0.95*height);
+}
+
+
 
 void orderScreen() {
   if (currentScreen == 1) {
     background(255);
-
-    fill(0);
-    rect(0, 0.9*height, width, height);
-
-    fill(255);
-    textSize(25);
-    textAlign(CENTER, CENTER);
-    text("Order Screen", width/2, 0.95*height);
-    textSize(15);
-    textAlign(LEFT, CENTER);
-    text("Move screens using [1,2,3,4]", width/100, 0.95*height);
+    navBar("Order Screen");
 
     // println(level);
     if (level == 0) {
@@ -222,58 +252,30 @@ void orderTicket(float topX, float topY, float ticketWidth, float ticketHeight, 
 void captureScreen() {
   if (currentScreen == 2) {
     background(255);
+    navBar("Capture Screen");
 
-    fill(0);
-    rect(0, 0.9*height, width, height);
 
-    fill(255);
-    textSize(25);
-    textAlign(CENTER, CENTER);
-    text("Capture Screen", width/2, 0.95*height);
-    textSize(15);
-    textAlign(LEFT, CENTER);
-    text("Move screens using [1,2,3,4]", width/100, 0.95*height);
+    for (int i = 0; i < TOTAL_CO2; i++) {
+      molecule[i].move();
+      molecule[i].display();
+    }
+    
+    
   }
 }
 
 void convertScreen() {
   if (currentScreen == 3) {
     background(255);
+    navBar("Convert Screen");
 
-    fill(0);
-    rect(0, 0.9*height, width, height);
-
-    fill(255);
-    textSize(25);
-    textAlign(CENTER, CENTER);
-    text("Convert Screen", width/2, 0.95*height);
-    textSize(15);
-    textAlign(LEFT, CENTER);
-    text("Move screens using [1,2,3,4]", width/100, 0.95*height);
   }
 }
 
 void createScreen() {
   if (currentScreen == 4) {
     background(255);
+    navBar("Create Screen");
 
-    fill(0);
-    rect(0, 0.9*height, width, height);
-
-    fill(255);
-    textSize(25);
-    textAlign(CENTER, CENTER);
-    text("Create Screen", width/2, 0.95*height);
-    textSize(15);
-    textAlign(LEFT, CENTER);
-    text("Move screens using [1,2,3,4]", width/100, 0.95*height);
-  }
-}
-
-void updateStats() {
-
-  if (frameCount % (frameRate * 30 * 1) == 0) { // 5 mins
-    println("update");
-    update = true;
   }
 }
