@@ -3,18 +3,25 @@ class Molecules {
   PVector position;
   int radius;
   color carbonColor;
-  int movement = 5;
+  int movement;
+  float randX, randY;
+  int molActivity = 5;
+  boolean visible = true;
 
   Molecules(int x, int y, int r, int c) {
     position = new PVector(x, y);
     radius = r;
     carbonColor = c;
+    movement = int(random(3,7));
   }
 
   void move() {
-    float randX = random(-movement, movement);
-    float randY = random(-movement, movement);
-
+    
+    
+    if (frameCount % int(random(molActivity,molActivity*2)) == 0) {
+      randX = random(-movement, movement);
+      randY = random(-movement, movement);
+    }
     //println("before randcoords" + randX + " " + randY);
 
     if (wallCollision(position.x, randX, 1)) {
@@ -48,7 +55,7 @@ class Molecules {
   void display() {
     fill(carbonColor);
     circle(position.x, position.y, radius);
-    
+
     fill(255, 0, 0);
     circle(position.x - radius, position.y, radius);
     circle(position.x + radius, position.y, radius);
