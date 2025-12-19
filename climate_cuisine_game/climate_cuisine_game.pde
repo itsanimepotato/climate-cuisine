@@ -19,14 +19,20 @@ int carbonConvert;
 int shopCO2; //increase when CO2 amt increase bought
 int shopCapture; //increase when capture upgrade bought
 int[] materialCreated;
+String[] materialCreatedNames = {
+  "Methane",
+  "Nanotubes",
+  "Alkaseltzer",
+  "Concrete",
+  "Chalk"
+};
 /*
- 0 = fuel C
- 1 = C nanotubes C
- 2 = alkaseltzer C
- 3 = concrete CaCO3
- 4 = chalk CaCO3
+ 0 = methane
+ 1 = nanotubes
+ 2 = alkaseltzer
+ 3 = concrete
+ 4 = chalk
  */
-
 
 
 // title screen globals
@@ -92,7 +98,6 @@ void setup() {
 
   materialCreated = new int[5];
   // println("materialCreated has been created: " + materialCreated);
-
   person1 = int(random(1, buyers.length));
   person2 = int(random(1, buyers.length));
   person3 = int(random(1, buyers.length));
@@ -411,7 +416,7 @@ void convertScreen() {
 
     rect(0, height*0.9-10, width, 10);
     colorMode(HSB, 360, 100, 100);
-    fill(frameCount*3%360, 100, 100);
+    fill(frameCount%360, 100, 100);
     rect(0, height*0.9-10, width-2.5*(frameCount%300), 10);
     colorMode(RGB, 255, 255, 255);
 
@@ -419,22 +424,39 @@ void convertScreen() {
     for (int i = 0; i < reaction.length; i++) {
       reaction[i].display();
       float distanceFromMouse = dist(mouseX, mouseY, reaction[i].center.x, reaction[i].center.y);
-      if ((distanceFromMouse <= reaction[i].chamberRad) && click) {
+      if ((distanceFromMouse <= reaction[i].chamberRad/2) && click && (carbonCaught>=5)) {
         reaction[i].process = true;
+
+        carbonCaught = carbonCaught - 5;
       }
 
       if (frameCount % 300 == 0) {
-        reaction[i].process = false;
-        reaction[i].count += 1;
-        click = false;
+        if (reaction[i].process) {
+          reaction[i].process = !reaction[i].process;
+          carbonConvert++;
+          materialCreated[i] = materialCreated[i] + 1;
+        }
       }
     }
-
+    for (int i = 0; i < materialCreated.length; i++) {
+      println(materialCreatedNames[i] + " " + materialCreated[i]);
+    }
 
     textAlign(CENTER, CENTER);
-    textSize(20);
+    textSize(15);
     fill(0);
     text("Press the circles to convert CO2 into the materials you need", 2*width/3, 3*height*0.9/4);
+    text("There's totally no bug here", 2*width/3, 3*height*0.9/4 + 20);
+    text("These are your stats in the order of", 2*width/3, 3*height*0.9/4 + 40);
+    convertStats();
+  }
+}
+
+void convertStats() {
+  textAlign(CENTER, CENTER);
+  for (int i = 0; i < materialCreated.length; i++) {
+    text(materialCreatedNames[i], 2*width/3 - i*75 + 150, 3*height*0.9/4 + 60);
+    text(materialCreated[i], 2*width/3 - i*75 + 150, 3*height*0.9/4 + 75);
   }
 }
 

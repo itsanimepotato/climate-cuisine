@@ -19,16 +19,16 @@ class Reactions {
     textSize(15);
     if (center.x < width/2) {
       textAlign(RIGHT, CENTER);
-      text(type + " Materials: " + count, center.x - chamberRad, center.y);
+      text(type + " Materials: " + count, center.x - chamberRad/2 - chamberRad/4, center.y);
     }
     if (center.x > width/2) {
       textAlign(LEFT, CENTER);
-      text(type + " Materials: " + count, center.x + chamberRad, center.y);
+      text(type + " Materials: " + count, center.x + chamberRad/2 + chamberRad/4, center.y);
     }
 
     if (process) {
       colorMode(HSB, 360, 100, 100);
-      fill(frameCount*3%360, 100, 100);
+      fill(frameCount%360, 100, 100);
       circle(center.x, center.y, chamberRad);
       colorMode(RGB, 255, 255, 255);
     }
