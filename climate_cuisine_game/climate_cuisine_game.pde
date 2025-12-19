@@ -16,17 +16,15 @@ boolean click;
 int level = -1; //tut = 0
 int carbonCaught;
 int carbonConvert;
-int carbonStored;
 int shopCO2; //increase when CO2 amt increase bought
 int shopCapture; //increase when capture upgrade bought
 int[] materialCreated;
 /*
  0 = fuel C
  1 = C nanotubes C
- 2 = carbonated water C
- 3 = carbon nanotubes C
- 4 = concrete CaCO3
- 5 = chalk CaCO3
+ 2 = alkaseltzer C
+ 3 = concrete CaCO3
+ 4 = chalk CaCO3
  */
 
 
@@ -55,7 +53,7 @@ String[] buyers = {
   "Tutorial Tester", // the tutorial person
   "Heating Henderson", // for fuel
   "Composite Coleman", // for C nanotubes
-  "Alkaseltzer Andy", // for carbonated water
+  "Alkaseltzer Andy", // for alkaseltzer
   "Building Benny", // for concrete
   "Chalk Cindy", // for chalk
 };
@@ -69,19 +67,30 @@ color carbonGray = color(128, 128, 128);
 color oxygenRed = color(255, 0, 0);
 Molecules[] molecule;
 
-
+// convert screen
+Reactions[] reaction;
+/*
+methane
+ nanotubes
+ alkaseltzer
+ concrete
+ chalk
+ */
 
 void setup() {
   size(750, 500);
   background(255);
+  frameRate(60);
 
   carbonCaught = 0;
   carbonConvert = 0;
-  carbonStored = 0;
+  captureRad = 67;
+  shopCO2 = 0;
+  shopCapture = 0;
 
   randomScrollText = int(random(0, scrollText.length));
 
-  materialCreated = new int[3];
+  materialCreated = new int[5];
   // println("materialCreated has been created: " + materialCreated);
 
   person1 = int(random(1, buyers.length));
@@ -104,9 +113,21 @@ void setup() {
     int startY = int(random(MOL_SIZE, height*0.9 - MOL_SIZE));
     molecule[i] = new Molecules(startX, startY, MOL_SIZE, carbonGray);
   }
-  captureRad = 67;
-  shopCO2 = 0;
-  shopCapture = 0;
+
+  reaction = new Reactions[5];
+
+  /*
+ 0 = fuel C
+   1 = C nanotubes C
+   2 = alkaseltzer C
+   3 = concrete CaCO3
+   4 = chalk CaCO3
+   */
+  reaction[0] = new Reactions(width/3, height*0.9/4, "Methane");
+  reaction[1] = new Reactions(width/3, 2*height*0.9/4, "Nanotubes");
+  reaction[2] = new Reactions(width/3, 3*height*0.9/4, "Alkaseltzer");
+  reaction[3] = new Reactions(2*width/3, height*0.9/4, "Concrete");
+  reaction[4] = new Reactions(2*width/3, 2*height*0.9/4, "Chalk");
 }
 
 void draw() {
@@ -170,7 +191,6 @@ void titleScreen() {
 
   if (currentScreen == 0) {
     background(255);
-
     titleGameText();
     titleBlinkingText();
     titleScrollingText();
@@ -225,11 +245,16 @@ void navBar(String screen) {
   // white text
   fill(255);
   textSize(25);
+
   textAlign(CENTER, CENTER);
   text(screen, width/2, 0.95*height);
+
   textSize(15);
   textAlign(LEFT, CENTER);
   text("Move screens using the keys [1,2,3,4,5]", width/100, 0.95*height);
+
+  textAlign(RIGHT, CENTER);
+  text("Captured C: " + carbonCaught + " " + "Converted C: " + carbonConvert, width-width/100, 0.95*height);
 }
 
 
@@ -282,6 +307,7 @@ void captureScreen() {
     background(255);
     navBar("Capture Screen");
 
+    captureBackground();
     captureCarbon();
 
     for (int i = 0; i < TOTAL_CO2; i++) {
@@ -324,10 +350,91 @@ void captureCarbon() {
   strokeWeight(1);
 }
 
+void captureBackground() {
+  fill(255);
+  rect(width*0.1, height*0.1, width*0.8, height*0.1);
+  textAlign(CENTER, CENTER);
+  textSize(25);
+  fill(0);
+  text("6343.2 million metric tons of CO2eq in the US (2022)", width/2, height*0.15);
+
+  fill(255);
+  rect(width*0.1, height*0.2, width*0.8, height*0.1);
+
+  fill(0, 0, 255);
+  rect(width*0.1, height*0.2, width*0.8*.28, height*0.1);
+  fill(255, 255, 0);
+  rect(width*0.1+width*0.8*.28, height*0.2, width*0.8*.25, height*0.1);
+  fill(128, 128, 128);
+  rect(width*0.1+width*0.8*.28+width*0.8*.25, height*0.2, width*0.8*.23, height*0.1);
+  fill(255, 75, 75);
+  rect(width*0.1+width*0.8*.28+width*0.8*.25+width*0.8*.23, height*0.2, width*0.8*.13, height*0.1);
+  fill(0, 255, 0);
+  rect(width*0.1+width*0.8*.28+width*0.8*.25+width*0.8*.23+width*0.8*.13, height*0.2, width*0.8*.10, height*0.1);
+
+  fill(0);
+  textSize(15);
+  textAlign(LEFT, CENTER);
+  text("The Transportation, Electrical, Industrial, Residential/Commercial, and Agricultural sectors", width*0.1, height*0.35);
+  text("creates 99% of the US's Greenhouse Gases (28%, 25%, 23%, 13%, 10% respectively + 1% other)", width*0.1, height*0.35+20);
+
+  textAlign(CENTER, CENTER);
+  text("How CO2 becomes usable (as in the playable part):", width/2, height*0.45);
+  textAlign(LEFT, CENTER);
+  text("Liquid Filtration", width*0.1, height*0.485);
+  textAlign(RIGHT, CENTER);
+  text("Gas Filtration", width*0.9, height*0.485);
+
+  fill(255);
+  rect(width*0.1, height*0.5, width*0.4, height*0.25);
+  rect(width*0.1+width*0.4, height*0.5, width*0.4, height*0.25);
+
+  textAlign(LEFT, CENTER);
+  fill(0);
+  text("- extracts CO2 by converting it to CaCO3", width*0.1+5, height*0.5+10);
+  text("- after CaCO3 is made, needs to heat up to use", width*0.1+5, height*0.5+30);
+  text("- inefficent", width*0.1+5, height*0.5+50);
+  text("- takes a while to collect", width*0.1+5, height*0.5+70);
+  text("CO2+H2O -> H2CO3+Ca(OH)2 -> CaCO3+2H2O", width*0.1+5, height*0.5+90);
+
+  text("- extracts CO2 by separating from the air", width*0.5+5, height*0.5+10);
+  text("- catalysts (end material = starting material)", width*0.5+5, height*0.5+30);
+  text("- works faster than liquid filtration", width*0.5+5, height*0.5+50);
+  text("- energy intensive", width*0.5+5, height*0.5+70);
+  text("CO2(g) -> filter -> CO2(g)", width*0.5+5, height*0.5+90);
+}
+
 void convertScreen() {
   if (currentScreen == 3) {
     background(255);
     navBar("Convert Screen");
+
+    rect(0, height*0.9-10, width, 10);
+    colorMode(HSB, 360, 100, 100);
+    fill(frameCount*3%360, 100, 100);
+    rect(0, height*0.9-10, width-2.5*(frameCount%300), 10);
+    colorMode(RGB, 255, 255, 255);
+
+
+    for (int i = 0; i < reaction.length; i++) {
+      reaction[i].display();
+      float distanceFromMouse = dist(mouseX, mouseY, reaction[i].center.x, reaction[i].center.y);
+      if ((distanceFromMouse <= reaction[i].chamberRad) && click) {
+        reaction[i].process = true;
+      }
+
+      if (frameCount % 300 == 0) {
+        reaction[i].process = false;
+        reaction[i].count += 1;
+        click = false;
+      }
+    }
+
+
+    textAlign(CENTER, CENTER);
+    textSize(20);
+    fill(0);
+    text("Press the circles to convert CO2 into the materials you need", 2*width/3, 3*height*0.9/4);
   }
 }
 
