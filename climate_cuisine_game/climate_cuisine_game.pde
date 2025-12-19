@@ -75,6 +75,10 @@ Molecules[] molecule;
 
 // convert screen
 Reactions[] reaction;
+
+
+// create screen
+Reactions[] creation;
 /*
 methane
  nanotubes
@@ -119,7 +123,11 @@ void setup() {
     molecule[i] = new Molecules(startX, startY, MOL_SIZE, carbonGray);
   }
 
-  reaction = new Reactions[5];
+  reaction = new Reactions[2];
+  reaction[0] = new Reactions(width/3, height*0.9/2, "CO2", 250);
+  reaction[1] = new Reactions(2*width/3, height*0.9/2, "CaCO3", 250);
+
+  creation = new Reactions[5];
 
   /*
  0 = fuel C
@@ -128,11 +136,11 @@ void setup() {
    3 = concrete CaCO3
    4 = chalk CaCO3
    */
-  reaction[0] = new Reactions(width/3, height*0.9/4, "Methane");
-  reaction[1] = new Reactions(width/3, 2*height*0.9/4, "Nanotubes");
-  reaction[2] = new Reactions(width/3, 3*height*0.9/4, "Alkaseltzer");
-  reaction[3] = new Reactions(2*width/3, height*0.9/4, "Concrete");
-  reaction[4] = new Reactions(2*width/3, 2*height*0.9/4, "Chalk");
+  creation[0] = new Reactions(width/3, height*0.9/4, "Methane", 100);
+  creation[1] = new Reactions(width/3, 2*height*0.9/4, "Nanotubes", 100);
+  creation[2] = new Reactions(width/3, 3*height*0.9/4, "Alkaseltzer", 100);
+  creation[3] = new Reactions(2*width/3, height*0.9/4, "Concrete", 100);
+  creation[4] = new Reactions(2*width/3, 2*height*0.9/4, "Chalk", 100);
 }
 
 void draw() {
@@ -398,7 +406,7 @@ void captureBackground() {
   fill(0);
   text("- extracts CO2 by converting it to CaCO3", width*0.1+5, height*0.5+10);
   text("- after CaCO3 is made, needs to heat up to use", width*0.1+5, height*0.5+30);
-  text("- inefficent", width*0.1+5, height*0.5+50);
+  text("- inefficient", width*0.1+5, height*0.5+50);
   text("- takes a while to collect", width*0.1+5, height*0.5+70);
   text("CO2+H2O -> H2CO3+Ca(OH)2 -> CaCO3+2H2O", width*0.1+5, height*0.5+90);
 
@@ -413,6 +421,24 @@ void convertScreen() {
   if (currentScreen == 3) {
     background(255);
     navBar("Convert Screen");
+  }
+}
+
+void statboard(float x, float y) {
+  textAlign(CENTER, CENTER);
+  fill(0);
+
+  for (int i = 0; i < materialCreated.length; i++) {
+    text(materialCreatedNames[i], x-i*75 + 150, y);
+    text(materialCreated[i], x-i*75 + 150, y + 15);
+  }
+}
+
+
+void createScreen() {
+  if (currentScreen == 4) {
+    background(255);
+    navBar("Create Screen");
 
     rect(0, height*0.9-10, width, 10);
     colorMode(HSB, 360, 100, 100);
@@ -421,18 +447,18 @@ void convertScreen() {
     colorMode(RGB, 255, 255, 255);
 
 
-    for (int i = 0; i < reaction.length; i++) {
-      reaction[i].display();
-      float distanceFromMouse = dist(mouseX, mouseY, reaction[i].center.x, reaction[i].center.y);
-      if ((distanceFromMouse <= reaction[i].chamberRad/2) && click && (carbonCaught>=5)) {
-        reaction[i].process = true;
+    for (int i = 0; i < creation.length; i++) {
+      creation[i].display();
+      float distanceFromMouse = dist(mouseX, mouseY, creation[i].center.x, creation[i].center.y);
+      if ((distanceFromMouse <= creation[i].chamberRad/2) && click && (materialCreated[i]>=5)) {
+        creation[i].process = true;
 
-        carbonCaught = carbonCaught - 5;
+        materialCreated[i] = materialCreated[i] - 1;
       }
 
       if (frameCount % 300 == 0) {
-        if (reaction[i].process) {
-          reaction[i].process = !reaction[i].process;
+        if (creation[i].process) {
+          creation[i].process = !creation[i].process;
           carbonConvert++;
           materialCreated[i] = materialCreated[i] + 1;
         }
@@ -443,27 +469,16 @@ void convertScreen() {
     }
 
     textAlign(CENTER, CENTER);
-    textSize(15);
+    textSize(20);
     fill(0);
-    text("Press the circles to convert CO2 into the materials you need", 2*width/3, 3*height*0.9/4);
-    text("There's totally no bug here", 2*width/3, 3*height*0.9/4 + 20);
-    text("These are your stats in the order of", 2*width/3, 3*height*0.9/4 + 40);
-    convertStats();
-  }
-}
 
-void convertStats() {
-  textAlign(CENTER, CENTER);
-  for (int i = 0; i < materialCreated.length; i++) {
-    text(materialCreatedNames[i], 2*width/3 - i*75 + 150, 3*height*0.9/4 + 60);
-    text(materialCreated[i], 2*width/3 - i*75 + 150, 3*height*0.9/4 + 75);
-  }
-}
+    text("Press the circles to create your end products!", width/2, 20);
 
-void createScreen() {
-  if (currentScreen == 4) {
-    background(255);
-    navBar("Create Screen");
+    textSize(15);
+    text("Stay on this screen to keep creating the materials", 2*width/3, 3*height*0.9/4);
+    text("There's totally no bugs here", 2*width/3, 3*height*0.9/4 + 20);
+    text("These are your stats:", 2*width/3, 3*height*0.9/4 + 40);
+    statboard(2*width/3, 3*height*0.9/4 + 60);
   }
 }
 

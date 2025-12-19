@@ -6,10 +6,10 @@ class Reactions {
   int count = 0;
 
 
-  Reactions(float x, float y, String t) {
+  Reactions(float x, float y, String t, int r) {
     center = new PVector(x, y);
     type = t;
-    chamberRad = 100;
+    chamberRad = r;
   }
 
   void display() {
