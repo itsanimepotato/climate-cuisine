@@ -39,4 +39,17 @@ void orderTicket(float topX, float topY, float ticketWidth, float ticketHeight, 
   textSize(25);
   textAlign(CENTER, CENTER);
   text(buyers[person], topX + ticketWidth/2, topY + 0.15*ticketHeight/2);
+  
+  orderChara(int(topX+ticketWidth/2), int(topY+ticketHeight/2)+50);
+}
+
+
+void orderChara(int x, int y) {
+  fill(255, 0, 0);
+  rect(x - 25, y - 50, 50, 100);
+  rect(x - 50, y - 25, 25, 50);
+  rect(x - 15, y + 50, 15, 25);
+  rect(x + 5, y + 50, 15, 25);
+  fill(0, 255, 255);
+  square(x+10, y-40, 25);
 }
