@@ -12,13 +12,13 @@ class Molecules {
     position = new PVector(x, y);
     radius = r;
     carbonColor = c;
-    movement = int(random(3,7));
+    movement = int(random(3, 7));
   }
 
   void move() {
-    
-    
-    if (frameCount % int(random(molActivity,molActivity*2)) == 0) {
+
+
+    if (frameCount % int(random(molActivity, molActivity*2)) == 0) {
       randX = random(-movement, movement);
       randY = random(-movement, movement);
     }

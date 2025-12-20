@@ -15,10 +15,12 @@ boolean click;
 // stats (stuff that changes)
 int level = -1; //tut = 0
 int carbonCaught;
+int totalCarbon = 0;
 int carbonConvert;
-int shopCO2; //increase when CO2 amt increase bought
-int shopCapture; //increase when capture upgrade bought
-int[] materialConverted; // 0 = CO2, 1=CaCO3
+int totalConvert = 0;
+int carbonCreate;
+int totalCreate = 0;
+int[] materialConverted; // 0 = CO2, 1 = CaCO3
 int[] materialCreated;
 String[] materialCreatedNames = {
   "Methane",
@@ -59,10 +61,10 @@ int person1, person2, person3 = 0;
 String[] buyers = {
   "Tutorial Tester", // the tutorial person
   "Heating Henderson", // for fuel
-  "Composite Coleman", // for C nanotubes
+  "Nanotube Nate", // for nanotubes
   "Alkaseltzer Andy", // for alkaseltzer
   "Building Benny", // for concrete
-  "Chalk Cindy", // for chalk
+  "Chalk Coleman", // for chalk
 };
 
 
@@ -76,7 +78,7 @@ Molecules[] molecule;
 
 // convert screen
 Molecules[] convertChamberMols;
-boolean converting = false;
+boolean[] converting;
 
 
 // create screen
@@ -89,6 +91,11 @@ methane
  chalk
  */
 
+
+// shop screen
+int shopCO2 = 0; //increase when CO2 amt increase bought
+int shopCapture = 0; //increase when capture upgrade bought
+
 void setup() {
   size(750, 500);
   background(255);
@@ -96,6 +103,7 @@ void setup() {
 
   carbonCaught = 0;
   carbonConvert = 0;
+  carbonCreate = 0;
   captureRad = 67;
   shopCO2 = 0;
   shopCapture = 0;
@@ -106,6 +114,9 @@ void setup() {
   materialConverted[0] = 0;
   materialConverted[1] = 0;
 
+  converting = new boolean[2];
+  converting[0] = false;
+  converting[1] = false;
 
   materialCreated = new int[5];
   // println("materialCreated has been created: " + materialCreated);
@@ -232,11 +243,9 @@ void titleBlinkingText() {
   if (blinky) {
     fill(255, 0, 0);
     text ("PRESS 1 for EASY, 2 for MEDIUM, 3 for HARD", width/2, height/2 + 150);
-    text ("PRESS 0 for the TUTORIAL", width/2, height/2 + 200);
   } else {
     fill(0, 255, 0);
     text ("PRESS 1 for EASY, 2 for MEDIUM, 3 for HARD", width/2, height/2 + 150);
-    text ("PRESS 0 for the TUTORIAL", width/2, height/2 + 200);
   }
 }
 
@@ -272,8 +281,9 @@ void navBar(String screen) {
   textAlign(LEFT, CENTER);
   text("Move screens using the keys [1,2,3,4,5]", width/100, 0.95*height);
 
+  textSize(12);
   textAlign(RIGHT, CENTER);
-  text("Captured C: " + carbonCaught + " " + "Converted C: " + carbonConvert, width-width/100, 0.95*height);
+  text("Total Captured C: " + totalCarbon + " " + "Total Converted C: " + totalConvert + " " + "Total Created: " +  totalCreate, width-width/100, 0.95*height);
 }
 
 void statboard(float x, float y) {
@@ -342,7 +352,7 @@ void captureScreen() {
     captureBackground();
     captureCarbon();
 
-    for (int i = 0; i < START_CO2; i++) {
+    for (int i = 0; i < molecule.length; i++) {
 
       molecule[i].move();
       if (molecule[i].visible) {
@@ -357,10 +367,13 @@ void captureScreen() {
 }
 
 void captureCarbon() {
-  int fullCapture = captureRad + shopCapture*10;
+  int fullCapture = captureRad + shopCapture*25;
+  if (shopCapture != 0) {
+   captureRad = 75; 
+  }
+  println(fullCapture);
   strokeWeight(3);
   fill(255, 255, 255, 0);
-  //circle(mouseX, mouseY, fullCapture);
 
   circle(mouseX, mouseY, fullCapture);
 
@@ -374,6 +387,7 @@ void captureCarbon() {
       stroke(255, 0, 0);
       if (molecule[i].visible) {
         carbonCaught++;
+        totalCarbon++;
       }
       molecule[i].visible = false;
       molecule[i].position = new PVector(startX, startY);
@@ -436,6 +450,10 @@ void captureBackground() {
   text("- works faster than liquid filtration", width*0.5+5, height*0.5+50);
   text("- energy intensive", width*0.5+5, height*0.5+70);
   text("CO2(g) -> filter -> CO2(g)", width*0.5+5, height*0.5+90);
+
+  textAlign(CENTER, CENTER);
+  textSize(20);
+  text("Carbon Stored: " + carbonCaught, width/2, height*0.9 - 50);
 }
 
 void convertScreen() {
@@ -454,8 +472,18 @@ void convertScreen() {
 
     convertMech(width/5, height/4, flaskRad, "CO2", 0);
     convertMech(width/5, height*0.9 - height/4, flaskRad, "CaCO3", 1);
-    text(materialConverted[0], width/2, height/4, flaskRad+25);
-    text(materialConverted[1], width/2, height*0.9 - height/4, flaskRad+25);
+    fill(0);
+    text(materialConverted[0], width/2, height/4 + 25);
+    text(materialConverted[1], width/2, height*0.9 - height/4 + 25);
+
+    textSize(20);
+
+    text("Methane", width-width/5, height/4-25);
+    text("Nanotubes", width-width/5, height/4);
+    text("Alkaseltzer", width-width/5, height/4+25);
+
+    text("Concrete", width-width/5, height*0.9 - height/4 -15);
+    text("Chalk", width-width/5, height*0.9 - height/4 +15);
   }
 }
 
@@ -468,39 +496,30 @@ void convertMech(float x, float y, int flaskRad, String typeName, int type) {
   circle(width-x, y, flaskRad);
 
   textAlign(CENTER, CENTER);
+  textSize(20);
   fill(0);
   text(typeName, width/2, y-25);
 
-
-  // left chamber
-  float distanceFromMouse = dist(mouseX, mouseY, x, y);
-  if ((distanceFromMouse <= flaskRad/2) && click && (carbonCaught >= 5)) {
-
-    for (int i = 0; i < 5; i++) {
+  float distance = dist(mouseX, mouseY, x, y);
+  if (distance <= flaskRad/2 && click && carbonCaught >= 5) {
+    converting[type] = true;
+    for (int i = 0; i < convertChamberMols.length; i++) {
       convertChamberMols[i] = new Molecules(int(x), int(y), MOL_SIZE, carbonGray);
     }
-    converting = true;
     carbonCaught -= 5;
   }
 
-  for (int i = 0; i < 5; i++) {
-    if (converting) {
+  if (converting[type] == true) {
+    for (int i = 0; i < convertChamberMols.length; i++) {
       convertChamberMols[i].position.x += random(-1, 1);
       convertChamberMols[i].position.y += random(-1, 1);
       convertChamberMols[i].display();
     }
-  }
-
-  if (frameCount%300 == 0) {
-    if (converting) {
-      if (type == 0) {
-        materialConverted[0]++;
-      } else {
-        materialConverted[1]++;
-      }
-      carbonConvert += 1;
+    if (frameCount % 300 == 0) {
+      materialConverted[type] += 1;
+      totalConvert += 1;
+      converting[type] = false;
     }
-    converting = false;
   }
 }
 
@@ -516,20 +535,45 @@ void createScreen() {
     rect(0, height*0.9-10, width-2.5*(frameCount%300), 10);
     colorMode(RGB, 255, 255, 255);
 
+    fill(0);
+    textSize(15);
+    textAlign(LEFT, CENTER);
+    text("Carbon based: " + materialConverted[0], 5, height*0.9/2);
+
+    textAlign(RIGHT, CENTER);
+    text("Calcium based: " + materialConverted[1], width-5, height*0.9/2);
 
     for (int i = 0; i < creation.length; i++) {
       creation[i].display();
       float distanceFromMouse = dist(mouseX, mouseY, creation[i].center.x, creation[i].center.y);
-      if ((distanceFromMouse <= creation[i].chamberRad/2) && click && (materialCreated[i]>=5)) {
-        creation[i].process = true;
 
-        materialCreated[i] = materialCreated[i] - 1;
+      boolean matConTest = false;
+      if (i <= 2) {
+        if (materialConverted[0] >= 1) {
+          matConTest = true;
+        }
+      } else {
+        if (materialConverted[1] >= 1) {
+
+          matConTest = true;
+        }
+      }
+
+
+      if ((distanceFromMouse <= creation[i].chamberRad/2) && click && (matConTest)) {
+        creation[i].process = true;
+        if (i <= 2) {
+          materialConverted[0]--;
+        } else {
+          materialConverted[1]--;
+        }
       }
 
       if (frameCount % 300 == 0) {
         if (creation[i].process) {
           creation[i].process = !creation[i].process;
-          carbonConvert++;
+          totalCreate++;
+          carbonCreate++;
           materialCreated[i] = materialCreated[i] + 1;
         }
       }
@@ -554,5 +598,51 @@ void shopScreen() {
   if (currentScreen == 5) {
     background(255);
     navBar("Shop Screen");
+
+    shopButton(width/3, height*0.9/2, 200, "Amount of CO2 available", 0);
+    shopButton(2*width/3, height*0.9/2, 200, "Size of CO2 capture radius", 1);
+
+    text(shopCO2 + " out of 5", width/3, height*0.9 - 100);
+    text(shopCapture + " out of 5", 2*width/3, height*0.9 - 100);
+  }
+}
+
+void shopButton(float x, float y, int r, String typeName, int type) {
+  fill(255);
+  circle(x, y, r);
+
+  textAlign(CENTER, CENTER);
+  textSize(20);
+  fill(0);
+  text(typeName, x, y - r/2 - 15);
+
+  float distanceFromMouse = dist(mouseX, mouseY, x, y);
+
+  if (distanceFromMouse <= r/2 && click) {
+    if (carbonCreate >= 1) {
+      fill(0);
+      circle(x, y, r);
+
+      if (type == 0) {
+        if (shopCO2 != 5) {
+          molecule = (Molecules[])expand(molecule);
+          shopCO2++;
+
+          for (int i = 0; i < molecule.length; i++) {
+            int startX = int(random(MOL_SIZE, width - MOL_SIZE));
+            int startY = int(random(MOL_SIZE, height*0.9 - MOL_SIZE));
+            molecule[i] = new Molecules(startX, startY, MOL_SIZE, carbonGray);
+          }
+        }
+      }
+
+      if (type == 1) {
+        if (shopCapture != 5) {
+          shopCapture++;
+        }
+      }
+
+      carbonCreate-=1;
+    }
   }
 }

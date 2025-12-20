@@ -16,14 +16,15 @@ class Reactions {
     fill(255);
     circle(center.x, center.y, chamberRad);
     fill(0);
-    textSize(15);
+    textSize(12.5);
+
     if (center.x < width/2) {
       textAlign(RIGHT, CENTER);
-      text(type + " Materials: " + count, center.x - chamberRad/2 - chamberRad/4, center.y);
+      text(type + ": " + count, center.x - chamberRad/2 - 5, center.y);
     }
     if (center.x > width/2) {
       textAlign(LEFT, CENTER);
-      text(type + " Materials: " + count, center.x + chamberRad/2 + chamberRad/4, center.y);
+      text(type + ": " + count, center.x + chamberRad/2 + 5, center.y);
     }
 
     if (process) {
