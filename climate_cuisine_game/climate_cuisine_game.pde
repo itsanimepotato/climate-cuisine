@@ -59,12 +59,18 @@ String[] scrollText = {
 int testPerson = 0;
 int person1, person2, person3 = 0;
 String[] buyers = {
-  "Tutorial Tester", // the tutorial person
   "Heating Henderson", // for fuel
   "Nanotube Nate", // for nanotubes
   "Alkaseltzer Andy", // for alkaseltzer
   "Building Benny", // for concrete
   "Chalk Coleman", // for chalk
+};
+String[] buyerReason = {
+  "so I can heat buildings and cook", // for fuel
+  "so I can do electronics", // for nanotubes
+  "so I can have soda", // for alkaseltzer
+  "so I can build buildings", // for concrete
+  "so I can write on a chalkboard", // for chalk
 };
 
 
@@ -172,20 +178,21 @@ void draw() {
 
 void keyPressed() {
   if (currentScreen == 0) {
-    if (key == '0') {
-      level = 0;
-    }
     if (key == '1') {
       level = 1;
+      currentScreen = 1;
+      gameStarted = true;
     }
     if (key == '2') {
       level = 2;
+      currentScreen = 1;
+      gameStarted = true;
     }
     if (key == '3') {
       level = 3;
+      currentScreen = 1;
+      gameStarted = true;
     }
-    currentScreen = 1;
-    gameStarted = true;
   }
 
 
