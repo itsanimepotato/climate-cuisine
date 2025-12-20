@@ -7,3 +7,8 @@ To play:
 - press the converting chamber to convert your CO2 into the base materials (carbon based/calcium based) needed (screen 3)
 - convert the base material into the material you need (screen 4)
 - buy stuff to make it easier to collect carbon dioxide (screen 5)
+
+To download:
+1. Press the green "Code" button
+2. Download ZIP
+3. Open the EXE file
