@@ -5,7 +5,7 @@ class Molecules {
   color carbonColor;
   int movement;
   float randX, randY;
-  int molActivity = 4; //smaller # = more jitter
+  int molActivity = 5; //smaller # = more jitter
   boolean visible = true;
 
   Molecules(int x, int y, int r, int c) {

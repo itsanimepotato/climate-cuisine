@@ -18,6 +18,7 @@ int carbonCaught;
 int carbonConvert;
 int shopCO2; //increase when CO2 amt increase bought
 int shopCapture; //increase when capture upgrade bought
+int[] materialConverted; // 0 = CO2, 1=CaCO3
 int[] materialCreated;
 String[] materialCreatedNames = {
   "Methane",
@@ -66,15 +67,16 @@ String[] buyers = {
 
 
 // capture screen
-int TOTAL_CO2;
+int START_CO2;
 int captureRad;
-int MOL_SIZE = 15;
+int MOL_SIZE = 10;
 color carbonGray = color(128, 128, 128);
 color oxygenRed = color(255, 0, 0);
 Molecules[] molecule;
 
 // convert screen
-Reactions[] reaction;
+Molecules[] convertChamberMols;
+boolean converting = false;
 
 
 // create screen
@@ -100,6 +102,11 @@ void setup() {
 
   randomScrollText = int(random(0, scrollText.length));
 
+  materialConverted = new int[2];
+  materialConverted[0] = 0;
+  materialConverted[1] = 0;
+
+
   materialCreated = new int[5];
   // println("materialCreated has been created: " + materialCreated);
   person1 = int(random(1, buyers.length));
@@ -114,18 +121,17 @@ void setup() {
   }
   println("person setup: " + person1 + person2 + person3);
 
-  TOTAL_CO2 = 10;
-  molecule = new Molecules[TOTAL_CO2];
+  START_CO2 = 5;
+  molecule = new Molecules[START_CO2];
 
-  for (int i = 0; i < TOTAL_CO2; i++) {
+  for (int i = 0; i < START_CO2; i++) {
     int startX = int(random(MOL_SIZE, width - MOL_SIZE));
     int startY = int(random(MOL_SIZE, height*0.9 - MOL_SIZE));
     molecule[i] = new Molecules(startX, startY, MOL_SIZE, carbonGray);
   }
 
-  reaction = new Reactions[2];
-  reaction[0] = new Reactions(width/3, height*0.9/2, "CO2", 250);
-  reaction[1] = new Reactions(2*width/3, height*0.9/2, "CaCO3", 250);
+  convertChamberMols = new Molecules[5];
+
 
   creation = new Reactions[5];
 
@@ -270,7 +276,15 @@ void navBar(String screen) {
   text("Captured C: " + carbonCaught + " " + "Converted C: " + carbonConvert, width-width/100, 0.95*height);
 }
 
+void statboard(float x, float y) {
+  textAlign(CENTER, CENTER);
+  fill(0);
 
+  for (int i = 0; i < materialCreated.length; i++) {
+    text(materialCreatedNames[i], x-i*75 + 150, y);
+    text(materialCreated[i], x-i*75 + 150, y + 15);
+  }
+}
 
 void orderScreen() {
   if (currentScreen == 1) {
@@ -319,11 +333,16 @@ void captureScreen() {
   if (currentScreen == 2) {
     background(255);
     navBar("Capture Screen");
+    rect(0, height*0.9-10, width, 10);
+    colorMode(HSB, 360, 100, 100);
+    fill(frameCount%360, 100, 100);
+    rect(0, height*0.9-10, width-2.5*(frameCount%300), 10);
+    colorMode(RGB, 255, 255, 255);
 
     captureBackground();
     captureCarbon();
 
-    for (int i = 0; i < TOTAL_CO2; i++) {
+    for (int i = 0; i < START_CO2; i++) {
 
       molecule[i].move();
       if (molecule[i].visible) {
@@ -346,14 +365,16 @@ void captureCarbon() {
   circle(mouseX, mouseY, fullCapture);
 
 
-  for (int i = 0; i < TOTAL_CO2; i++) {
+  for (int i = 0; i < START_CO2; i++) {
     float distanceFromMouse = dist(mouseX, mouseY, molecule[i].position.x, molecule[i].position.y);
 
     if ((distanceFromMouse <= fullCapture/2) && click) {
       int startX = int(random(MOL_SIZE, width - MOL_SIZE));
       int startY = int(random(MOL_SIZE, height*0.9 - MOL_SIZE));
       stroke(255, 0, 0);
-      carbonCaught++;
+      if (molecule[i].visible) {
+        carbonCaught++;
+      }
       molecule[i].visible = false;
       molecule[i].position = new PVector(startX, startY);
     }
@@ -421,16 +442,65 @@ void convertScreen() {
   if (currentScreen == 3) {
     background(255);
     navBar("Convert Screen");
+
+    rect(0, height*0.9-10, width, 10);
+    colorMode(HSB, 360, 100, 100);
+    fill(frameCount%360, 100, 100);
+    rect(0, height*0.9-10, width-2.5*(frameCount%300), 10);
+    colorMode(RGB, 255, 255, 255);
+
+    int flaskRad = 175;
+    fill(255);
+
+    convertMech(width/5, height/4, flaskRad, "CO2", 0);
+    convertMech(width/5, height*0.9 - height/4, flaskRad, "CaCO3", 1);
+    text(materialConverted[0], width/2, height/4, flaskRad+25);
+    text(materialConverted[1], width/2, height*0.9 - height/4, flaskRad+25);
   }
 }
 
-void statboard(float x, float y) {
+void convertMech(float x, float y, int flaskRad, String typeName, int type) {
+
+  // chambers
+  fill(255);
+  rect(x+flaskRad/2, y-10, 3*height/4, 10);
+  circle(x, y, flaskRad);
+  circle(width-x, y, flaskRad);
+
   textAlign(CENTER, CENTER);
   fill(0);
+  text(typeName, width/2, y-25);
 
-  for (int i = 0; i < materialCreated.length; i++) {
-    text(materialCreatedNames[i], x-i*75 + 150, y);
-    text(materialCreated[i], x-i*75 + 150, y + 15);
+
+  // left chamber
+  float distanceFromMouse = dist(mouseX, mouseY, x, y);
+  if ((distanceFromMouse <= flaskRad/2) && click && (carbonCaught >= 5)) {
+
+    for (int i = 0; i < 5; i++) {
+      convertChamberMols[i] = new Molecules(int(x), int(y), MOL_SIZE, carbonGray);
+    }
+    converting = true;
+    carbonCaught -= 5;
+  }
+
+  for (int i = 0; i < 5; i++) {
+    if (converting) {
+      convertChamberMols[i].position.x += random(-1, 1);
+      convertChamberMols[i].position.y += random(-1, 1);
+      convertChamberMols[i].display();
+    }
+  }
+
+  if (frameCount%300 == 0) {
+    if (converting) {
+      if (type == 0) {
+        materialConverted[0]++;
+      } else {
+        materialConverted[1]++;
+      }
+      carbonConvert += 1;
+    }
+    converting = false;
   }
 }
 
@@ -464,9 +534,7 @@ void createScreen() {
         }
       }
     }
-    for (int i = 0; i < materialCreated.length; i++) {
-      println(materialCreatedNames[i] + " " + materialCreated[i]);
-    }
+
 
     textAlign(CENTER, CENTER);
     textSize(20);
